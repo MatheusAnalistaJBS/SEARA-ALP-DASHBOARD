@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Rota Híbrida ALP · Seara SP · Mai/2026</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+:root {
+  --accent: #E8420A;
+  --accent-soft: rgba(232,66,10,0.14);
+  --accent-glow: rgba(232,66,10,0.30);
+  --glass-bg: rgba(255,255,255,0.60);
+  --glass-border: rgba(255,255,255,0.88);
+  --glass-shadow: 0 10px 40px rgba(0,0,0,0.07), inset 0 1px 0 rgba(255,255,255,0.95);
+  --radius: 24px; --radius-sm: 14px;
+  --transition: all 0.38s cubic-bezier(0.16,1,0.3,1);
+  --text: #1d1d1f; --text-2: #86868b; --text-3: #aeaeb2;
+}
+* { box-sizing:border-box; margin:0; padding:0; -webkit-font-smoothing:antialiased; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background:
+    radial-gradient(ellipse at 20% 10%, rgba(232,66,10,0.09) 0%, transparent 55%),
+    radial-gradient(ellipse at 80% 80%, rgba(232,66,10,0.05) 0%, transparent 50%),
+    linear-gradient(145deg, #e6e6ef 0%, #dadadf 50%, #e2e2eb 100%);
+  min-height:100vh; padding:90px 14px 40px; color:var(--text);
+}
+/* GLASS BASE */
+.glass {
+  background: var(--glass-bg);
+  backdrop-filter: blur(50px) saturate(200%);
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius);
+  box-shadow: var(--glass-shadow);
+  padding: 16px; margin-bottom:10px;
+  position:relative; overflow:hidden; transition:var(--transition);
+}
+.glass:hover {
+  border-color: rgba(232,66,10,0.28);
+  box-shadow: 0 0 0 1px rgba(232,66,10,0.12), 0 16px 50px rgba(232,66,10,0.12), var(--glass-shadow);
+}
+/* PULSE MAIS FORTE */
+.glass.pulse-anim { animation: pulseCard 0.3s cubic-bezier(0.25,1,0.5,1); }
+@keyframes pulseCard {
+  0%   { transform: scale(1); box-shadow: var(--glass-shadow); }
+  40%  { transform: scale(1.014); box-shadow: 0 0 0 3px rgba(232,66,10,0.25), 0 20px 60px rgba(232,66,10,0.20); }
+  100% { transform: scale(1); box-shadow: var(--glass-shadow); }
+}
+/* RIPPLE LARANJA MAIS FORTE */
+.ripple {
+  position:absolute; border-radius:50%;
+  background: rgba(232,66,10,0.30);
+  transform:scale(0); pointer-events:none;
+  animation: ripple-effect 0.55s cubic-bezier(0.25,1,0.5,1) forwards;
+}
+@keyframes ripple-effect { to { transform:scale(5); opacity:0; } }
+/* INTERATIVOS */
+.kpi-card,.farol-card,.causa-card,.plano-item,.report-toggle,.ranking-card {
+  cursor:pointer !important;
+  -webkit-tap-highlight-color: rgba(0,0,0,0) !important;
+  user-select:none !important; -webkit-user-select:none !important;
+  touch-action:manipulation;
+}
+/* GATEKEEPER */
+#gatekeeper {
+  position:fixed; top:0; left:0; width:100%; height:100%;
+  background:
+    radial-gradient(ellipse at 30% 20%, rgba(232,66,10,0.09) 0%, transparent 60%),
+    linear-gradient(145deg,#e6e6ef 0%,#dadadf 50%,#e2e2eb 100%);
+  z-index:9999; display:flex; align-items:center; justify-content:center; padding:20px;
+}
+.login-box {
+  background:var(--glass-bg); backdrop-filter:blur(50px) saturate(200%);
+  -webkit-backdrop-filter:blur(50px) saturate(200%);
+  border:1px solid var(--glass-border); padding:40px 30px;
+  border-radius:var(--radius); box-shadow:var(--glass-shadow);
+  width:100%; max-width:360px; text-align:center;
+}
+.login-logo { width:14px; height:14px; background:var(--accent); border-radius:50%; margin:0 auto 12px; box-shadow:0 0 16px rgba(232,66,10,0.4); }
+.login-box h2 { font-size:19px; font-weight:700; margin-bottom:6px; }
+.login-box p { font-size:12px; color:var(--text-2); margin-bottom:20px; }
+.login-input { width:100%; padding:12px; border-radius:10px; border:1px solid rgba(0,0,0,0.15); font-size:15px; font-weight:600; text-align:center; outline:none; background:rgba(255,255,255,0.6); -webkit-appearance:none; }
+.login-btn { width:100%; padding:12px; margin-top:12px; border-radius:10px; border:none; background:var(--accent); color:#fff; font-size:14px; font-weight:600; cursor:pointer; box-shadow:0 4px 16px rgba(232,66,10,0.3); transition:var(--transition); }
+.login-btn:hover { box-shadow:0 6px 24px rgba(232,66,10,0.4); transform:translateY(-1px); }
+.error-msg { color:#FF3B30; font-size:12px; font-weight:600; margin-top:10px; display:none; }
+#main-dashboard { display:none; }
+/* HEADER */
+#header {
+  position:fixed; top:14px; left:50%; transform:translateX(-50%);
+  width:calc(100% - 28px); max-width:1100px; z-index:1000;
+  background:rgba(255,255,255,0.70);
+  backdrop-filter:blur(50px) saturate(200%); -webkit-backdrop-filter:blur(50px) saturate(200%);
+  border:1px solid var(--glass-border); border-radius:20px; padding:10px; text-align:center;
+  box-shadow:0 4px 24px rgba(232,66,10,0.10), 0 0 0 1px rgba(232,66,10,0.06);
+}
+#header h1 { font-size:12.5px; font-weight:700; color:var(--accent); }
+#header p { font-size:10.5px; color:var(--text-2); margin-top:2px; }
+.container { max-width:1100px; margin:0 auto; width:100%; }
+.section-title { font-size:11px; font-weight:700; color:var(--text-2); text-transform:uppercase; letter-spacing:0.05em; margin:28px 0 10px 2px; padding-left:8px; border-left:3px solid var(--accent); }
+/* KPIs */
+.kpi-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+@media(max-width:768px){ .kpi-grid { grid-template-columns:repeat(2,1fr); } }
+.kpi-card { padding:16px 12px; }
+.kpi-label { font-size:11px; color:var(--text-2); font-weight:500; margin-bottom:4px; }
+.kpi-value { font-size:22px; font-weight:700; color:var(--text); line-height:1.1; }
+.kpi-value span { font-size:13px; font-weight:600; }
+.kpi-sub { font-size:10.5px; margin-top:4px; font-weight:500; }
+.kpi-sub.up { color:#1a8a3a; } .kpi-sub.down { color:#ea3323; } .kpi-sub.neutral { color:var(--text-2); }
+.kpi-sub.best { color:#1a8a3a; font-weight:700; }
+.kpi-value.green { color:#1a8a3a; }
+.kpi-detail { display:none; margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,0,0,0.05); font-size:12px; color:var(--text-2); line-height:1.6; }
+.kpi-card.open .kpi-detail { display:block; }
+/* CHART */
+.chart-card { padding:16px; }
+.chart-title { font-size:13px; font-weight:600; margin-bottom:12px; }
+/* FAROL */
+.farol-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+@media(max-width:600px){ .farol-grid { grid-template-columns:1fr; } }
+.farol-card { padding:16px; }
+.farol-header { display:flex; align-items:center; gap:6px; margin-bottom:2px; }
+.farol-icon { font-size:16px; } .farol-name { font-size:13.5px; font-weight:700; }
+.farol-desc { font-size:11px; color:var(--text-2); margin-bottom:10px; }
+.farol-metrics { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.farol-metric { background:rgba(255,255,255,0.45); border-radius:var(--radius-sm); padding:8px; border:1px solid rgba(255,255,255,0.55); }
+.fm-label { font-size:9.5px; color:var(--text-2); text-transform:uppercase; letter-spacing:0.03em; }
+.fm-value { font-size:15px; font-weight:700; } .fm-value.accent { color:var(--accent); }
+.fm-value.green { color:#1a8a3a; }
+.farol-detail { display:none; margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,0,0,0.05); }
+.farol-card.open .farol-detail { display:block; }
+.pb-row { margin-top:8px; }
+.pb-label { display:flex; justify-content:space-between; font-size:11px; color:var(--text-2); margin-bottom:4px; }
+.pb-track { height:5px; background:rgba(0,0,0,0.05); border-radius:3px; overflow:hidden; }
+.pb-fill { height:5px; border-radius:3px; background:linear-gradient(90deg,var(--accent),rgba(232,66,10,0.5)); }
+/* BADGES */
+.badge { font-size:9px; font-weight:600; padding:2px 7px; border-radius:10px; white-space:nowrap; }
+.badge-red { background:rgba(255,59,48,0.10); color:#FF3B30; }
+.badge-yellow { background:rgba(255,204,0,0.12); color:#8A6D00; }
+.badge-blue { background:rgba(0,122,255,0.08); color:#007AFF; }
+.badge-green { background:rgba(26,138,58,0.10); color:#1a8a3a; }
+.badge-orange { background:var(--accent-soft); color:var(--accent); }
+/* CAUSA */
+.causa-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+@media(max-width:600px){ .causa-grid { grid-template-columns:1fr; } }
+.causa-card { padding:12px 14px; }
+.causa-header { display:flex; align-items:center; justify-content:space-between; gap:8px; }
+.causa-title { font-size:12px; font-weight:600; flex:1; line-height:1.3; }
+.causa-detail { display:none; margin-top:10px; padding-top:10px; border-top:1px solid rgba(0,0,0,0.05); font-size:12px; color:var(--text-2); line-height:1.5; }
+.causa-card.open .causa-detail { display:block; }
+.chevron { font-size:11px; color:var(--text-3); transition:transform 0.3s; }
+/* CANAL */
+.canal-card { padding:0; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.canal-table { width:100%; border-collapse:collapse; min-width:380px; }
+.canal-table th { padding:10px 12px; text-align:left; font-size:9.5px; font-weight:600; color:var(--text-2); text-transform:uppercase; background:rgba(0,0,0,0.02); border-bottom:1px solid rgba(0,0,0,0.05); }
+.canal-table th:last-child { text-align:right; }
+.canal-table td { padding:9px 12px; font-size:12px; border-bottom:1px solid rgba(0,0,0,0.04); }
+.canal-table td:last-child { text-align:right; font-weight:600; }
+.canal-table tr:last-child td { border-bottom:none; }
+.pct-mini { height:4px; border-radius:2px; background:var(--accent); display:inline-block; vertical-align:middle; }
+/* PLANO */
+.plano-item { border-bottom:1px solid rgba(0,0,0,0.04); }
+.plano-item:last-child { border-bottom:none; }
+.plano-header { display:flex; align-items:center; gap:10px; padding:12px 6px; transition:background 0.2s; }
+.plano-header:hover { background:rgba(232,66,10,0.03); }
+.plano-num { width:24px; height:24px; border-radius:50%; background:var(--accent-soft); color:var(--accent); font-size:11px; font-weight:700; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.plano-title { font-size:12px; font-weight:600; flex:1; line-height:1.3; }
+.plano-detail { display:none; padding:4px 12px 14px 40px; font-size:12px; color:var(--text-2); line-height:1.6; }
+.plano-item.open .plano-detail { display:block; }
+/* RANKING */
+.ranking-card { padding:0; overflow:hidden; }
+.ranking-header { padding:14px 16px; border-bottom:1px solid rgba(0,0,0,0.05); cursor:pointer; display:flex; align-items:center; justify-content:space-between; transition:background 0.2s; }
+.ranking-header:hover { background:rgba(232,66,10,0.03); }
+.ranking-title { font-size:13px; font-weight:700; }
+.ranking-body { display:none; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.ranking-card.open .ranking-body { display:block; }
+.ranking-table { width:100%; border-collapse:collapse; min-width:340px; }
+.ranking-table th { padding:8px 12px; text-align:left; font-size:9.5px; font-weight:600; color:var(--text-2); text-transform:uppercase; background:rgba(0,0,0,0.02); border-bottom:1px solid rgba(0,0,0,0.05); }
+.ranking-table th.r { text-align:right; }
+.ranking-table td { padding:8px 12px; font-size:11.5px; border-bottom:1px solid rgba(0,0,0,0.03); }
+.ranking-table td.r { text-align:right; }
+.ranking-table tr:last-child td { border-bottom:none; }
+.rk { width:22px; height:22px; border-radius:50%; font-size:10px; font-weight:700; display:inline-flex; align-items:center; justify-content:center; }
+.rk-g { background:rgba(255,196,0,0.18); color:#a07000; }
+.rk-s { background:rgba(170,170,170,0.18); color:#666; }
+.rk-b { background:rgba(180,100,30,0.14); color:#7a4500; }
+.rk-n { background:var(--accent-soft); color:var(--accent); }
+.vol-bar { height:4px; border-radius:2px; background:linear-gradient(90deg,var(--accent),rgba(232,66,10,0.35)); display:inline-block; vertical-align:middle; margin-right:6px; }
+/* REPORT */
+.report-section { margin-top:32px; padding:20px; background:rgba(255,255,255,0.55); backdrop-filter:blur(50px) saturate(200%); -webkit-backdrop-filter:blur(50px) saturate(200%); border:1px solid var(--glass-border); border-radius:var(--radius); border-top:3px solid var(--accent); box-shadow:var(--glass-shadow); }
+.report-toggle { display:flex; align-items:center; justify-content:space-between; cursor:pointer; user-select:none; }
+.report-toggle h2 { font-size:13.5px; font-weight:700; }
+.report-body { display:none; margin-top:14px; }
+.report-body.open { display:block; }
+.report-block { margin-bottom:14px; }
+.report-block h3 { font-size:11px; font-weight:700; color:var(--accent); text-transform:uppercase; letter-spacing:0.05em; margin-bottom:5px; }
+.report-block p { font-size:12px; color:var(--text-2); line-height:1.7; }
+.footer-signature { text-align:center; font-size:11px; font-weight:600; color:rgba(232,66,10,0.45); padding:40px 0 10px; letter-spacing:0.04em; font-style:italic; }
+</style>
+</head>
+<body>
+ 
+<div id="gatekeeper">
+  <div class="login-box">
+    <div class="login-logo"></div>
+    <h2>Diretoria São Paulo</h2>
+    <p>Insira a credencial operacional para acessar o Ecossistema Canal INN 2026</p>
+    <input type="password" id="passkey" class="login-input" placeholder="Senha Operacional">
+    <button class="login-btn" id="btn-submit">Acessar Painel</button>
+    <div id="error-alert" class="error-msg">Credencial incorreta. Tente novamente.</div>
+  </div>
+</div>
+ 
+<div id="main-dashboard">
+  <div id="header">
+    <h1>🔁 Rota Híbrida ALP · Dir. São Paulo · Mai/2026</h1>
+    <p>1.010 clientes INN positivados · 44,6t · Cross-sell 18,5% · Parcial mai/2026</p>
+  </div>
+ 
+  <div class="container">
+ 
+    <div class="section-title">Indicadores do Projeto</div>
+    <div class="kpi-grid">
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Base total do projeto</div>
+        <div class="kpi-value">12.148<span> cli</span></div>
+        <div class="kpi-sub neutral">5.448 com ALP ativo · 1.010 positivados INN em mai</div>
+        <div class="kpi-detail">Base total: 12.148 clientes no projeto. Destes, 5.448 têm ALP ativo (44,8%). Apenas 1.010 compraram INN em maio — 8,3% da base total e 18,5% dos clientes ALP ativos.</div>
+      </div>
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Volume INN · Maio parcial</div>
+        <div class="kpi-value">44,6<span>t</span></div>
+        <div class="kpi-sub up" style="color:var(--accent); font-weight:700;">Meta Desejada: > 100t</div>
+        <div class="kpi-detail">Bench histórico: Abril/2026 com 63,8t — maior mês do projeto. Março/2026: 63,0t. Volume de maio ainda em construção — dado parcial. Meta de aceleração agressiva para romper a barreira das 100 toneladas.</div>
+      </div>
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Clientes INN positivados · Mai</div>
+        <div class="kpi-value">1.010<span> cli</span></div>
+        <div class="kpi-sub down" style="color:#FF3B30; font-weight:700;">Meta de Cross-sell: 50%</div>
+        <div class="kpi-detail">Bench histórico: Março/2026 com 1.480 clientes — maior número do projeto. Abril/2026: 1.406 clientes. Dado de maio parcial. Meta de aproveitamento estipulada em 50% de penetração.</div>
+      </div>
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Cross-sell ALP + INN</div>
+        <div class="kpi-value">895<span> cli</span></div>
+        <div class="kpi-sub down">↓ vs abril (1.018) · 16,4% da base ALP</div>
+        <div class="kpi-detail">895 clientes comprando ALP e INN em maio. Bench: Abril/2026 com 1.018 clientes — maior cross-sell do projeto. Para novo recorde precisamos superar 1.018 clientes com compra dupla.</div>
+      </div>
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Potencial inexplorado</div>
+        <div class="kpi-value">4.552<span> cli</span></div>
+        <div class="kpi-sub down" style="color:#FF3B30">ALP ativo · zero INN em maio</div>
+        <div class="kpi-detail">4.552 clientes com ALP ativo sem nenhuma compra INN em maio. Representam 83,6% da base ALP. Se 10% forem convertidos = +455 novos clientes INN. Maior alavanca do projeto.</div>
+      </div>
+ 
+      <div class="glass kpi-card" data-action="toggle">
+        <div class="kpi-label">Crescimento jan → abr</div>
+        <div class="kpi-value">+108<span>%</span></div>
+        <div class="kpi-sub up">↑ 30,7t → 63,8t em 4 meses</div>
+        <div class="kpi-detail">Crescimento acumulado dos 4 primeiros meses: Jan 30,7t · Fev 46,8t · Mar 62,0t · Abr 63,8t (pico). Trajetória positiva consistente. Manter acima de 60t/mês é o novo desafio.</div>
+      </div>
+ 
+    </div>
+ 
+    <div class="section-title">Evolução Mensal — Volume INN e Clientes Positivados</div>
+    <div class="glass chart-card">
+      <div class="chart-title">Volume INN (toneladas) · Jan–Mai 2026</div>
+      <div style="height:220px;position:relative;">
+        <canvas id="chartEvolucao"></canvas>
+      </div>
+    </div>
+ 
+    <div class="section-title">Farol por Diretoria</div>
+    <div class="farol-grid">
+ 
+      <div class="glass farol-card" data-action="toggle">
+        <div class="farol-header"><span class="farol-icon">🟡</span><span class="farol-name">Interior</span></div>
+        <div class="farol-desc">Cross-sell 14,7% · maior volume · abaixo do potencial</div>
+        <div class="farol-metrics">
+          <div class="farol-metric"><div class="fm-label">Base total</div><div class="fm-value">8.279</div></div>
+          <div class="farol-metric"><div class="fm-label">ALP ativos</div><div class="fm-value">4.632</div></div>
+          <div class="farol-metric"><div class="fm-label">INN positivados</div><div class="fm-value accent">737</div></div>
+          <div class="farol-metric"><div class="fm-label">Cross-sell</div><div class="fm-value accent">14,7%</div></div>
+        </div>
+        <div class="farol-detail">
+          <div class="pb-row">
+            <div class="pb-label"><span>Cross-sell</span><span>679 cli · 14,7% · meta 50%</span></div>
+            <div class="pb-track"><div class="pb-fill" style="width:29%"></div></div>
+          </div>
+          <div class="pb-row" style="margin-top:8px">
+            <div class="pb-label"><span>INN positivados mai vs abr</span><span>737 vs 1.061 ↓</span></div>
+            <div class="pb-track"><div class="pb-fill" style="width:69%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-top:10px;line-height:1.6">Interior concentra 70% do volume INN mas tem cross-sell de apenas 14,7%. Potencial: 3.953 clientes ALP sem INN. Bench abril: 796 cross-sell — precisamos superar.</p>
+        </div>
+      </div>
+ 
+      <div class="glass farol-card" data-action="toggle">
+        <div class="farol-header"><span class="farol-icon">🟢</span><span class="farol-name">Capital</span></div>
+        <div class="farol-desc">Cross-sell 26,7% · melhor taxa · próxima da meta</div>
+        <div class="farol-metrics">
+          <div class="farol-metric"><div class="fm-label">Base total</div><div class="fm-value">1.577</div></div>
+          <div class="farol-metric"><div class="fm-label">ALP ativos</div><div class="fm-value">795</div></div>
+          <div class="farol-metric"><div class="fm-label">INN positivados</div><div class="fm-value accent">265</div></div>
+          <div class="farol-metric"><div class="fm-label">Cross-sell</div><div class="fm-value accent">26,7%</div></div>
+        </div>
+        <div class="farol-detail">
+          <div class="pb-row">
+            <div class="pb-label"><span>Cross-sell</span><span>212 cli · 26,7% · meta 50%</span></div>
+            <div class="pb-track"><div class="pb-fill" style="width:53%"></div></div>
+          </div>
+          <div class="pb-row" style="margin-top:8px">
+            <div class="pb-label"><span>INN positivados mai vs abr</span><span>265 vs 339 ↓</span></div>
+            <div class="pb-track"><div class="pb-fill" style="width:78%"></div></div>
+          </div>
+          <p style="font-size:12px;color:var(--text-2);margin-top:10px;line-height:1.6">Capital próxima da meta histórica. Bench abril: 222 cross-sell — maio superou com 212 (parcial). Potencial: 583 clientes ALP sem INN ainda a converter.</p>
+        </div>
+      </div>
+ 
+    </div>
+ 
+    <div class="section-title">Top 20 Produtos · Volume INN Mai/2026 (kg)</div>
+    <div class="glass ranking-card" data-action="ranking">
+      <div class="ranking-header">
+        <span class="ranking-title">🏆 Ranking Produtos · Mai/2026</span>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="ranking-body">
+        <table class="ranking-table">
+          <thead><tr><th>#</th><th>Produto</th><th class="r">Volume kg</th><th>Participação</th></tr></thead>
+          <tbody id="tbody-sku"></tbody>
+        </table>
+      </div>
+    </div>
+ 
+    <div class="section-title">Distribuição por Canal · Mai/2026</div>
+    <div class="glass canal-card">
+      <table class="canal-table">
+        <thead><tr><th>Canal</th><th>Volume INN</th><th>Clientes</th><th>Part. %</th><th style="text-align:right">Farol</th></tr></thead>
+        <tbody>
+          <tr><td><b>Food Services Regionais</b></td><td>17,9t</td><td>386</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:40px"></span>40,2%</span></td><td style="text-align:right"><span class="badge badge-orange">Principal</span></td></tr>
+          <tr><td><b>Varejo Tradicional</b></td><td>16,6t</td><td>403</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:37px"></span>37,2%</span></td><td style="text-align:right"><span class="badge badge-orange">2º canal</span></td></tr>
+          <tr><td>Food Serv. Institucional</td><td>3,2t</td><td>53</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:7px"></span>7,1%</span></td><td style="text-align:right"><span class="badge badge-yellow">Crescer</span></td></tr>
+          <tr><td>Vizinhança</td><td>3,0t</td><td>56</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:7px"></span>6,7%</span></td><td style="text-align:right"><span class="badge badge-yellow">Atenção</span></td></tr>
+          <tr><td>Padaria Food Services</td><td>1,8t</td><td>50</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:4px"></span>4,0%</span></td><td style="text-align:right"><span class="badge badge-blue">Monitor</span></td></tr>
+          <tr><td>Padaria</td><td>1,0t</td><td>32</td><td><span style="display:inline-flex;align-items:center;gap:5px"><span class="pct-mini" style="width:2px"></span>2,3%</span></td><td style="text-align:right"><span class="badge badge-blue">Monitor</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+ 
+    <div class="section-title">Análise de Causa</div>
+    <div class="glass" style="padding:8px">
+      <div class="causa-grid" style="gap:0">
+        <div class="causa-card glass" style="border-radius:var(--radius-sm);margin:4px" data-action="toggle">
+          <div class="causa-header"><div class="causa-title">Time ALP não oferta INN ativamente</div><span class="badge badge-red">Confirmado</span><span class="chevron">▼</span></div>
+          <div class="causa-detail">Cross-sell estagnado em 16-17% por 3 meses consecutivos (mar/abr/mai). 83,6% da base ALP nunca comprou INN. Sem mudança de abordagem a taxa não vai evoluir.</div>
+        </div>
+        <div class="causa-card glass" style="border-radius:var(--radius-sm);margin:4px" data-action="toggle">
+          <div class="causa-header"><div class="causa-title">Ajuste da Régua Comercial Regional</div><span class="badge badge-red">Confirmado</span><span class="chevron">▼</span></div>
+          <div class="causa-detail">Três meses sem evolução estrutural do cross-sell confirma a urgência do novo teto do Bruno: meta estipulada de cross-sell batendo 50% e volume escalando acima de 100t.</div>
+        </div>
+        <div class="causa-card glass" style="border-radius:var(--radius-sm);margin:4px" data-action="toggle">
+          <div class="causa-header"><div class="causa-title">Sem incentivo financeiro para INN</div><span class="badge badge-yellow">Provável</span><span class="chevron">▼</span></div>
+          <div class="causa-detail">Vendedor ALP não tem acelerador de comissão para venda INN. Proposta de 1,5x ainda não aprovada. É a alavanca mais rápida disponível para mover o número.</div>
+        </div>
+        <div class="causa-card glass" style="border-radius:var(--radius-sm);margin:4px" data-action="toggle">
+          <div class="causa-header"><div class="causa-title">Capital próxima da meta — Interior crítico</div><span class="badge badge-yellow">Atenção</span><span class="chevron">▼</span></div>
+          <div class="causa-detail">Capital com faturamento consolidado saudável. Interior exige ação. O modelo de roteirização e ativação da Capital precisa ser documentado e replicado com urgência.</div>
+        </div>
+        <div class="causa-card glass" style="border-radius:var(--radius-sm);margin:4px;grid-column:1/-1" data-action="toggle">
+          <div class="causa-header"><div class="causa-title">Queda maio = dado parcial · não é sinal de deterioração</div><span class="badge badge-blue">Parcial</span><span class="chevron">▼</span></div>
+          <div class="causa-detail">Volume de 44,6t in maio é parcial — o mês ainda está em construção. Abril também começou baixo e fechou em 63,8t. Aguardar o fechamento antes de tomar decisões baseadas na queda.</div>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="section-title">Plano de Aceleração</div>
+    <div class="glass" style="padding:0;overflow:hidden">
+      <div class="plano-item" data-action="plano">
+        <div class="plano-header"><div class="plano-num">1</div><div class="plano-title">Definir meta INN obrigatória para supervisores ALP — esta semana</div><span class="badge badge-red">Urgente</span><span class="chevron">▼</span></div>
+        <div class="plano-detail">Aceleração com teto agressivo proposto pelo Bruno: cross-sell de 50% e tracionamento focado nas frentes do interior paulista para bater as 100t.</div>
+      </div>
+      <div class="plano-item" data-action="plano">
+        <div class="plano-header"><div class="plano-num">2</div><div class="plano-title">Documentar modelo Capital e replicar para Interior</div><span class="badge badge-red">Urgente</span><span class="chevron">▼</span></div>
+        <div class="plano-detail">Entrevistar supervisores e vendedores da Capital esta semana. Mapear abordagem, frequência e mix INN ofertado. Criar playbook e aplicar no Interior in até 15 dias.</div>
+      </div>
+      <div class="plano-item" data-action="plano">
+        <div class="plano-header"><div class="plano-num">3</div><div class="plano-title">Incentivo de comissão 1,5x para venda INN pelo time ALP</div><span class="badge badge-orange">Em andamento</span><span class="chevron">▼</span></div>
+        <div class="plano-detail">Proposta formal para RH e Comercial: acelerador de 1,5x na comissão para vendas INN nos primeiros 90 dias. Foco nos 4.552 clientes de potencial inexplorado. Aprovação pendente.</div>
+      </div>
+      <div class="plano-item" data-action="plano">
+        <div class="plano-header"><div class="plano-num">4</div><div class="plano-title">Mix INN simplificado · 5 SKUs prioritários para o time ALP</div><span class="badge badge-orange">Pendente</span><span class="chevron">▼</span></div>
+        <div class="plano-detail">Top SKUs maio: Meio Peito S/OPF, Coxa SBCX, Carré Suíno e Barriga. Criar card de abordagem com os 5 SKUs de maior giro para o vendedor ALP usar na visita. Bruno e Matheus definem a lista final.</div>
+      </div>
+      <div class="plano-item" data-action="plano">
+        <div class="plano-header"><div class="plano-num">5</div><div class="plano-title">Cadência executiva semanal ALP + INN</div><span class="badge badge-orange">Pendente</span><span class="chevron">▼</span></div>
+        <div class="plano-detail">Grupo com gerentes ALP e INN. Report toda segunda via WhatsApp com KPIs principais. Reunião quinzenal de 30min. Matheus atualiza o dashboard toda segunda e quarta. Próxima reunião: agendar com gestão ALP.</div>
+      </div>
+    </div>
+ 
+    <div class="report-section">
+      <div class="report-toggle" id="btn-report">
+        <h2>📋 Report Executivo · Mai/2026</h2>
+        <span class="chevron" id="report-chevron">▼</span>
+      </div>
+      <div class="report-body" id="report-body">
+        <div class="report-block">
+          <h3>Resumo Executivo</h3>
+          <p>O Projeto Rota Híbrida ALP registra em maio parcial 44,6t de volume INN com 1.010 clientes positivados. O dado ainda está em construção — abril fechou como pico histórico com 63,8t e 1.406 clientes. O cross-sell mantém-se estagnado em 16,4% pelo terceiro mês consecutivo, sinalizando urgência na implantação do novo teto de 50% estipulado pelo diretor Bruno.</p>
+        </div>
+      </div>
+    </div>
+ 
+    <div class="footer-signature">Empowered by Bruno Freitas</div>
+  </div>
+</div>
+ 
+<script>
+const ENCRYPTED_KEY = "SearaSP2026";
+ 
+// TOP 20 SKUs — dados reais maio/2026
+const TOP_SKU = [
+  {r:1,item:"Filé Peito FG CG PCT · 929883",vol:5220},
+  {r:2,item:"Meio Peito S/OPF Interf · 220359",vol:3940},
+  {r:3,item:"Carré Suíno · 996845",vol:3117},
+  {r:4,item:"Barriga CG · 625701",vol:2523},
+  {r:5,item:"Coxa Sbcx C/O 15kg · 795259",vol:2235},
+  {r:6,item:"Fgo Pass Padaria 800g · 993403",vol:1368},
+  {r:7,item:"Coxinha Asa CG Alm · 18244",vol:1350},
+  {r:8,item:"Fgo Int Caip CG PCT · 229848",vol:1188},
+  {r:9,item:"Filé Peito Met CG BDJ · 15105",vol:1152},
+  {r:10,item:"Filezinho Frango IQF · 197734",vol:1044},
+  {r:11,item:"Costela Suína CG · 9199",vol:975},
+  {r:12,item:"Banha Suína 18kg · 205388",vol:882},
+  {r:13,item:"Costela Barr Suíno Salg · 3115",vol:828},
+  {r:14,item:"Moela Frango CG Alm · 18228",vol:810},
+  {r:15,item:"Frango Passarinho PCT · 985503",vol:738},
+  {r:16,item:"Coração Fgo CG Alm · 18163",vol:738},
+  {r:17,item:"Filezinho Peito CG Bl · 14567",vol:720},
+  {r:18,item:"Costela Lombo CX CG · 1228",vol:666},
+  {r:19,item:"Filé Peito CG IQF · 792306",vol:636},
+  {r:20,item:"Pés Suíno SG · 3220",vol:560}
+];
+ 
+function buildRankings() {
+  const maxSku = TOP_SKU[0].vol;
+  const tbSku = document.getElementById('tbody-sku');
+  TOP_SKU.forEach(s => {
+    const pct = (s.vol/maxSku*100).toFixed(0);
+    const cls = s.r===1?'rk-g':s.r===2?'rk-s':s.r===3?'rk-b':'rk-n';
+    const pctTotal = (s.vol/44600*100).toFixed(1);
+    tbSku.innerHTML += `<tr>
+      <td><span class="rk ${cls}">${s.r}</span></td>
+      <td style="font-size:11px">${s.item}</td>
+      <td class="r"><b>${s.vol.toLocaleString('pt-BR')}</b></td>
+      <td><span class="vol-bar" style="width:${Math.max(pct*0.5,2)}px"></span><span style="font-size:10px;color:var(--text-2)">${pctTotal}%</span></td>
+    </tr>`;
+  });
+}
+ 
+function triggerRipple(e, el) {
+  if (!e||!el) return;
+  const rect = el.getBoundingClientRect();
+  let cx = e.clientX||(e.touches&&e.touches[0]?e.touches[0].clientX:0);
+  let cy = e.clientY||(e.touches&&e.touches[0]?e.touches[0].clientY:0);
+  if (cx===0&&e.changedTouches&&e.changedTouches[0]){cx=e.changedTouches[0].clientX;cy=e.changedTouches[0].clientY;}
+  const x=cx-rect.left, y=cy-rect.top;
+  const r=document.createElement('div'); r.className='ripple';
+  r.style.left=`${x}px`; r.style.top=`${y}px`;
+  const sz=Math.max(rect.width,rect.height);
+  r.style.width=r.style.height=`${sz}px`;
+  r.style.marginLeft=r.style.marginTop=`${-sz/2}px`;
+  el.appendChild(r);
+  el.classList.add('pulse-anim');
+  setTimeout(()=>el.classList.remove('pulse-anim'),300);
+  setTimeout(()=>r.remove(),550);
+}
+ 
+function setup(sel,cb){document.querySelectorAll(sel).forEach(el=>el.addEventListener('click',function(e){cb.call(this,e);}));}
+ 
+document.addEventListener("DOMContentLoaded",function(){
+  document.getElementById('btn-submit').addEventListener('click',verifyPasskey);
+  document.getElementById('passkey').addEventListener('keydown',e=>{if(e.key==='Enter')verifyPasskey();});
+  setup('[data-action="toggle"]',function(e){triggerRipple(e,this);this.classList.toggle('open');const c=this.querySelector('.chevron');if(c)c.style.transform=this.classList.contains('open')?'rotate(180deg)':'';});
+  setup('[data-action="plano"]',function(e){const h=this.querySelector('.plano-header');triggerRipple(e,h);this.classList.toggle('open');const c=this.querySelector('.chevron');if(c)c.style.transform=this.classList.contains('open')?'rotate(180deg)':'';});
+  setup('[data-action="ranking"]',function(e){this.classList.toggle('open');const c=this.querySelector('.chevron');if(c)c.style.transform=this.classList.contains('open')?'rotate(180deg)':'';});
+  document.getElementById('btn-report').addEventListener('click',function(e){triggerRipple(e,this);const b=document.getElementById('report-body');const c=document.getElementById('report-chevron');b.classList.toggle('open');if(c)c.style.transform=b.classList.contains('open')?'rotate(180deg)':'';});
+});
+ 
+function verifyPasskey(){
+  const v=document.getElementById('passkey').value;
+  if(v===ENCRYPTED_KEY){
+    document.getElementById('gatekeeper').style.display='none';
+    document.getElementById('main-dashboard').style.display='block';
+    buildRankings();
+    setTimeout(initChart,80);
+  } else {
+    document.getElementById('error-alert').style.display='block';
+  }
+}
+ 
+function initChart(){
+  const ctx=document.getElementById('chartEvolucao').getContext('2d');
+  new Chart(ctx,{
+    type:'bar',
+    data:{
+      labels:['Janeiro','Fevereiro','Março','Abril','Maio (parcial)'],
+      datasets:[
+        {
+          label:'Volume INN (t)',
+          data:[30.7,46.8,63.0,63.8,44.6],
+          backgroundColor:['rgba(232,66,10,0.60)','rgba(232,66,10,0.72)','rgba(232,66,10,0.88)','rgba(232,66,10,0.95)','rgba(232,66,10,0.38)'],
+          borderRadius:10,borderSkipped:false,yAxisID:'y'
+        },
+        {
+          label:'Clientes INN positivados',
+          data:[746,1150,1480,1406,1010],
+          type:'line',borderColor:'#007AFF',backgroundColor:'rgba(0,122,255,0.06)',
+          borderWidth:2.5,pointBackgroundColor:'#007AFF',pointRadius:4,tension:0.35,fill:true,yAxisID:'y1'
+        }
+      ]
+    },
+    options:{
+      responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{labels:{font:{family:'-apple-system,sans-serif',size:11},color:'#86868b'}}},
+      scales:{
+        y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},callback:v=>v+'t'}},
+        y1:{position:'right',grid:{drawOnChartArea:false},ticks:{font:{size:11},color:'#007AFF'}},
+        x:{grid:{display:false},ticks:{font:{size:11}}}
+      }
+    }
+  });
+}
+</script>
+</body>
+</html>
